@@ -33,6 +33,27 @@ def normaliser_docker(ligne: str, numero: int,
     )
 
 
+_CLES_TRIVY = ("Target", "VulnerabilityID", "PkgName",
+               "InstalledVersion", "Severity", "Timestamp")
+
+
 def normaliser_trivy(rapport: dict, numero: int,
                      environment: str = "production") -> Evenement:
-    raise NotImplementedError
+    manquantes = [cle for cle in _CLES_TRIVY if cle not in rapport]
+    if manquantes:
+        raise ValueError(
+            f"Clés manquantes dans le rapport Trivy : {manquantes}")
+    severite = str(rapport["Severity"]).upper()
+    if severite not in SEVERITES:
+        severite = "LOW"
+    return Evenement(
+        id=f"EVT-{numero:05d}",
+        timestamp=rapport["Timestamp"],
+        source="TRIVY",
+        component=rapport["Target"],
+        environment=environment,
+        event_type="VULNERABILITY",
+        severity=severite,
+        message=(f"Vulnérabilité {rapport['VulnerabilityID']} détectée dans "
+                 f"{rapport['PkgName']} {rapport['InstalledVersion']}"),
+    )
