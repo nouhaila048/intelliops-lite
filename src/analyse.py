@@ -72,4 +72,3 @@ def analyser(evt: Evenement, base: dict) -> Analyse:
         sensible=sensible,
         sources=[evt.source]
     )
-
