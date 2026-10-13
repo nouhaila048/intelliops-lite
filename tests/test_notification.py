@@ -1,7 +1,6 @@
 import unittest
 from src.contrat import Analyse, Evenement
-from src.notification import choisir_canal, rediger
-
+from src.notification import choisir_canal, notifier, rediger
 
 def exemple(sensible=True, criticite="CRITICAL"):
     e = Evenement("EVT-00125", "2026-10-05T10:02:11Z", "DOCKER", "backend",
@@ -40,6 +39,22 @@ class TestNotification(unittest.TestCase):
         a.sources = ["DOCKER", "TRIVY"]
         self.assertTrue(rediger(e, a).endswith("Sources : DOCKER, TRIVY"))
 
+        # --- notifier ---
+    def test_notifier(self):
+        e, a = exemple()
+        journal = []
+        notif = notifier(e, a, journal)
+        self.assertEqual(notif.event_id, "EVT-00125")
+        self.assertEqual(notif.canal, "TEAMS")
+        self.assertEqual(notif.destinataire, "equipe-ops")
+        self.assertEqual(notif.message, rediger(e, a))
+        self.assertEqual(journal, [notif])
+        self.assertEqual(e.status, "NOTIFIED")
+
+    def test_notifier_criticite_invalide(self):
+        e, a = exemple(criticite="XXX")
+        with self.assertRaises(ValueError):
+            notifier(e, a, [])
 
 if __name__ == "__main__":
     unittest.main()
