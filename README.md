@@ -7,3 +7,5 @@ Notification) qui échangent via un contrat commun (src/contrat.py).
 
 ## Équipe
 -Maroua : Agent Notification [c]
+- Nouhaila Hibat-Allah : agent Extraction (A)
+- Hossam Ouammi : agent Analyse (B)
