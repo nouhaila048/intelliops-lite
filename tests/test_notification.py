@@ -1,7 +1,7 @@
 import unittest
 from src.contrat import Analyse, Evenement
-from src.notification import choisir_canal, notifier, rediger
-
+from src.notification import (choisir_canal, demander_validation, notifier,
+                              rediger)
 def exemple(sensible=True, criticite="CRITICAL"):
     e = Evenement("EVT-00125", "2026-10-05T10:02:11Z", "DOCKER", "backend",
                   "production", "CONTAINER_RESTART", "HIGH",
@@ -56,5 +56,26 @@ class TestNotification(unittest.TestCase):
         with self.assertRaises(ValueError):
             notifier(e, a, [])
 
+
+        # --- demander_validation ---
+    def test_validation(self):
+        _, a = exemple()
+        self.assertTrue(demander_validation(a, " OUI "))
+        self.assertFalse(demander_validation(a, "n"))
+
+    def test_validation_reponses_positives(self):
+        _, a = exemple()
+        for rep in ["o", "O", "oui", "y", "YES", " yes "]:
+            self.assertTrue(demander_validation(a, rep), rep)
+
+    def test_validation_reponses_negatives(self):
+        _, a = exemple()
+        for rep in ["", "non", "no", "peut-être"]:
+            self.assertFalse(demander_validation(a, rep), rep)
+
+    def test_validation_non_sensible(self):
+        _, a = exemple(sensible=False, criticite="LOW")
+        self.assertTrue(demander_validation(a, "n"))
+        
 if __name__ == "__main__":
     unittest.main()
