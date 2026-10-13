@@ -1,4 +1,5 @@
 from src.contrat import Analyse, Evenement
+import re
 
 
 
@@ -23,8 +24,22 @@ def rechercher_runbook(evt: Evenement, base: dict):
 
 
 
+
 def classer(evt: Evenement) -> str:
-    raise NotImplementedError
+
+    if evt.event_type == "CONTAINER_RESTART":
+        match = re.search(r"restarts=(\d+)", evt.message)
+
+        if match and int(match.group(1)) >= 10:
+            return "CRITICAL"
+
+        return "MEDIUM"
+
+    if evt.event_type == "VULNERABILITY" and evt.severity == "CRITICAL":
+        return "HIGH"
+
+    return evt.severity
+
 
 
 def analyser(evt: Evenement, base: dict) -> Analyse:
